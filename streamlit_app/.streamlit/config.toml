@@ -1,0 +1,35 @@
+[server]
+# Enable CORS for external access
+enableCORS = true
+
+# Allow connections from any origin
+enableXsrfProtection = false
+
+# Listen on all network interfaces (0.0.0.0)
+headless = true
+
+# Port to run on (default 8501)
+port = 8501
+
+# Address to bind to (0.0.0.0 for external access)
+address = "0.0.0.0"
+
+# Enable WebSocket compression
+enableWebsocketCompression = true
+
+# Maximum message size
+maxMessageSize = 200
+
+[browser]
+# Don't try to open browser on startup
+gatherUsageStats = false
+serverAddress = "0.0.0.0"
+serverPort = 8501
+
+[theme]
+# Optional: Set a theme
+primaryColor = "#F63366"
+backgroundColor = "#FFFFFF"
+secondaryBackgroundColor = "#F0F2F6"
+textColor = "#262730"
+font = "sans serif"

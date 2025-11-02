@@ -1,0 +1,80 @@
+version: '3.8'
+
+services:
+  # Backend API Service (Flask + LangGraph ReAct Agent)
+  backend:
+    build:
+      context: .
+      dockerfile: ./backend/Dockerfile
+    container_name: pharma_pv_backend
+    ports:
+      - "0.0.0.0:5000:5000"   # Exposed to outside world on port 5000
+    environment:
+      - FLASK_ENV=production
+      - SECRET_KEY=${SECRET_KEY:-change-this-secret-key-in-production}
+      - DATABASE_URL=${DATABASE_URL:-sqlite:////app/data/pharma_pv.db}
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - OPENAI_MODEL=${OPENAI_MODEL:-gpt-4.1-mini}
+      - PUBMED_API_KEY=${PUBMED_API_KEY}
+      - PUBMED_EMAIL=${PUBMED_EMAIL}
+      - MAX_ARTICLES_PER_SEARCH=${MAX_ARTICLES_PER_SEARCH:-100}
+      - CORS_ORIGINS=${CORS_ORIGINS:-*}
+    volumes:
+      - ./backend/data:/app/data
+      - ./backend/exports:/app/exports
+    networks:
+      - pharma_network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # Streamlit Frontend Service
+  streamlit:
+    build:
+      context: ./streamlit_app
+      dockerfile: Dockerfile
+    container_name: pharma_pv_streamlit
+    ports:
+      - "0.0.0.0:8501:8501"   # Exposed to outside world on port 8501
+    environment:
+      - API_BASE_URL=http://backend:5000
+    depends_on:
+      - backend
+    networks:
+      - pharma_network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8501/_stcore/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # Optional: PostgreSQL Database (uncomment if needed)
+  # db:
+  #   image: postgres:15-alpine
+  #   container_name: pharma_pv_db
+  #   environment:
+  #     - POSTGRES_USER=${POSTGRES_USER:-pharma_admin}
+  #     - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-change_this_password}
+  #     - POSTGRES_DB=${POSTGRES_DB:-pharma_pv}
+  #   volumes:
+  #     - postgres_data:/var/lib/postgresql/data
+  #   ports:
+  #     - "5432:5432"
+  #   networks:
+  #     - pharma_network
+  #   restart: unless-stopped
+
+networks:
+  pharma_network:
+    driver: bridge
+
+volumes:
+  postgres_data:
+    driver: local
+

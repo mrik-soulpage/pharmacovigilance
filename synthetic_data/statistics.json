@@ -1,0 +1,10 @@
+{
+  "total_articles": 100,
+  "icsr_cannot_exclude": 30,
+  "icsr_can_exclude": 20,
+  "relevant_safety_info": 25,
+  "irrelevant": 25,
+  "products_covered": 15,
+  "eu_products": 5,
+  "non_eu_products": 10
+}
